@@ -7,8 +7,11 @@ class Channel {
   final String profilePictureUrl;
   final String subscriberCount;
   final String videoCount;
-  final String uploadPlaylistId;
   List<Video> videos;
+  Map<String,String> playlistsInfo;
+  List<String> playlistNames = [];
+  String selectedPlaylistName;
+  String selectedPlaylistId;
 
   Channel({
     this.id,
@@ -16,8 +19,8 @@ class Channel {
     this.profilePictureUrl,
     this.subscriberCount,
     this.videoCount,
-    this.uploadPlaylistId,
     this.videos,
+    this.playlistsInfo,
   });
 
   factory Channel.fromMap(Map<String, dynamic> map) {
@@ -27,8 +30,26 @@ class Channel {
       profilePictureUrl: map['snippet']['thumbnails']['default']['url'],
       subscriberCount: map['statistics']['subscriberCount'],
       videoCount: map['statistics']['videoCount'],
-      uploadPlaylistId: map['contentDetails']['relatedPlaylists']['uploads'],
     );
   }
+
+  void setSelectedPlaylist(String playlistName){
+    selectedPlaylistName = playlistName;
+    selectedPlaylistId = playlistsInfo[selectedPlaylistName];
+  }
+
+  void set setPlaylistsInfo(Map<String,String> playlists){
+    print("In the playlistInfoSetter");
+    playlistsInfo = playlists;
+
+    playlistsInfo.forEach((k,v){
+      playlistNames.add(k);
+    });
+
+    selectedPlaylistName = playlistNames[0];
+    selectedPlaylistId = playlistsInfo[selectedPlaylistName];
+  }
+
+
 
 }
