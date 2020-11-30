@@ -142,6 +142,18 @@ class APIService {
           Video.fromMap(json['snippet']),
         ),
       );
+      for(var index = 0; index < videos.length; index++){
+        var video = videos[index];
+        print(video.id);
+        print(video.questions);
+        var questions = video.questions;
+        questions.forEach((key, value) {
+          print(key);
+          print(value.question);
+          print(value.answers[0]);
+        });
+      }
+
       return videos;
     } else {
       throw json.decode(response.body)['error']['message'];
