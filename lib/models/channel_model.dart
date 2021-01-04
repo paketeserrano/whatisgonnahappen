@@ -2,7 +2,7 @@ import 'package:youtube1/models/video_model.dart';
 
 class Channel {
 
-  final String id;
+  String id;
   final String title;
   final String profilePictureUrl;
   final String subscriberCount;
@@ -38,7 +38,7 @@ class Channel {
     selectedPlaylistId = playlistsInfo[selectedPlaylistName];
   }
 
-  void set setPlaylistsInfo(Map<String,String> playlists){
+  set setPlaylistsInfo(Map<String,String> playlists){
     print("In the playlistInfoSetter");
     playlistsInfo = playlists;
 

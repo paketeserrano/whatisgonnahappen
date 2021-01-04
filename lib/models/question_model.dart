@@ -1,14 +1,44 @@
-import 'package:english_words/english_words.dart';
+
 class Question{
   int id;
-  String question;
-  List<String> answers;
+  int videoId;
+  int officialAnswerId;
+  String statement;
+  int timeToShow;
+  int timeToStop;
+  List<dynamic> answers;
 
-  Question(){
-    this.id = 1;
-    this.question = "";
-    answers = List<String>();
-    nouns.take(10).forEach((element) {this.question += element;});
-    adjectives.take(3).forEach((element) {this.answers.add(element);});
+  Question({
+    this.id,
+    this.videoId,
+    this.officialAnswerId,
+    this.statement,
+    this.timeToShow,
+    this.timeToStop,
+    this.answers,
+});
+
+  factory Question.fromMap(Map<String, dynamic> map) {
+    return Question(
+      id: map['id'],
+      videoId: map['video_id'],
+      officialAnswerId: map['official_answer_id'],
+      statement: map['statement'],
+      timeToShow: map['time_to_show'],
+      timeToStop: map['time_to_stop'],
+      answers: map['answers'],
+    );
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      'id': this.id.toString(),
+      'videoId': this.videoId,
+      'officialAnswerId': officialAnswerId.toString(),
+      'statement': this.statement,
+      'timeToShow': this.timeToShow.toString(),
+      'timeToStop': this.timeToStop.toString(),
+      'answers': answers,
+    };
   }
 }
