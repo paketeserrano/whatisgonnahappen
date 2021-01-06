@@ -18,7 +18,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   List<Video> _videos = List<Video>();
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _initPlaylist();
   }
@@ -29,7 +29,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         .fetchPlaylistVideos(playlist:widget.playlist);
 
     setState(() {
-      print('----------- In the set playlist screen state function');
       _videos = videos;
       _playlist = widget.playlist;
     });
@@ -37,9 +36,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   _buildProfileInfo() {
     return Container(
-        margin: EdgeInsets.all(20.0),
-        padding: EdgeInsets.all(20.0),
-        height: 200.0,
+        margin: EdgeInsets.all(5.0),
+        padding: EdgeInsets.all(10.0),
+        height: 100.0,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -58,7 +57,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 CircleAvatar(
                   backgroundColor: Colors.white,
                   radius: 35.0,
-                  backgroundImage: NetworkImage(_playlist.profilePictureUrl),
+                  backgroundImage: NetworkImage('https://icon-icons.com/icons2/800/PNG/64/_hashtag_icon-icons.com_65804.png'),
                 ),
                 SizedBox(width: 12.0),
                 Expanded(
@@ -133,7 +132,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('YouTube Channel'),
+        title: Text('Hashtags'),
       ),
       body: ListView.builder(
           itemCount: 1 + _videos.length,

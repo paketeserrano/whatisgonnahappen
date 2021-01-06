@@ -8,7 +8,7 @@ class Video {
   String name;
   bool published;
   String thumbnailUrl;
-  SplayTreeMap<int,Question> questions;
+  List<Question> questions;
 
   Video({
     this.id,
@@ -40,10 +40,10 @@ class Video {
     };
   }
 
-  static SplayTreeMap<int,Question> createQuestions(List<dynamic> questionsJson){
-    SplayTreeMap<int,Question> questions = SplayTreeMap<int,Question>();
+  static List<Question> createQuestions(List<dynamic> questionsJson){
+    List<Question> questions = List<Question>();
     for(dynamic questionJson in questionsJson){
-      questions[questionJson['time_to_show']] = Question.fromMap(questionJson);
+      questions.add(Question.fromMap(questionJson));
     }
     return questions;
   }

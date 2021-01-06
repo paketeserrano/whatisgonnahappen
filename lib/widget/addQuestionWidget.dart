@@ -10,7 +10,10 @@ class QuestionWidget extends StatefulWidget{
 
 class QuestionWidgetState extends State<QuestionWidget>{
   TextEditingController question;
-  TextEditingController time;
+  TextEditingController time_to_show;
+  TextEditingController time_to_stop;
+  TextEditingController time_to_start;
+  TextEditingController time_to_end;
   TextEditingController answer1;
   TextEditingController answer2;
   TextEditingController answer3;
@@ -20,7 +23,10 @@ class QuestionWidgetState extends State<QuestionWidget>{
   void initState(){
     super.initState();
     question = TextEditingController();
-    time = TextEditingController();
+    time_to_show = TextEditingController();
+    time_to_stop = TextEditingController();
+    time_to_start = TextEditingController();
+    time_to_end = TextEditingController();
     answer1 = TextEditingController();
     answer2 = TextEditingController();
     answer3 = TextEditingController();
@@ -30,7 +36,10 @@ class QuestionWidgetState extends State<QuestionWidget>{
   @override
   void dispose(){
     question.dispose();
-    time.dispose();
+    time_to_show.dispose();
+    time_to_stop.dispose();
+    time_to_start.dispose();
+    time_to_end.dispose();
     answer1.dispose();
     answer2.dispose();
     answer3.dispose();
@@ -59,13 +68,49 @@ class QuestionWidgetState extends State<QuestionWidget>{
                 },
               ),
               TextFormField(
-                controller: time,
+                controller: time_to_show,
                 decoration: const InputDecoration(
                   labelText: 'Time to ask question (in seconds)',
                 ),
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Please enter the time to ask the question in seconds';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: time_to_stop,
+                decoration: const InputDecoration(
+                  labelText: 'Time to stop to wait for the user to answer (in seconds)',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter the time to stop to wait for the user to answer the question (in seconds)';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: time_to_start,
+                decoration: const InputDecoration(
+                  labelText: 'Time to start the video section with this question (in seconds)',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter the time to start the video section with this question (in seconds)';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: time_to_end,
+                decoration: const InputDecoration(
+                  labelText: 'Time to end the video section with this question (in seconds)',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter the time to end the video section with this question (in seconds)';
                   }
                   return null;
                 },

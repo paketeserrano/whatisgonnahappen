@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube1/models/channel_model.dart';
-import 'package:youtube1/screens/channel_screen.dart';
-import 'package:youtube1/models/video_model.dart';
+import 'package:youtube1/models/playlist_model.dart';
+import 'package:youtube1/screens/playlist_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
@@ -12,7 +12,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Channel> channels = List<Channel>();
+  List<Playlist> _playlists = List<Playlist>();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -21,27 +22,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _initHome() async {
-    channels = await APIService.instance
-        .fetchChannel();
+    var playlists = await APIService.instance
+        .fetchPlaylists();
+
+    print('<------------>');
+    print(playlists);
+    print(playlists.length);
+    print('<------------>');
 
     setState(() {
       print('----------- In the set state function');
+      _playlists = playlists;
     });
   }
 
-  _buildChannelInfo(channel) {
-    Video video;
+  _buildPlaylist(Playlist playlist) {
     return GestureDetector(
-        onTap: () => Navigator.push(
+      onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ChannelScreen(channel),
-          ),
+          builder: (_) => PlaylistScreen(playlist),
         ),
-      child:Container(
-        margin: EdgeInsets.all(20.0),
-        padding: EdgeInsets.all(20.0),
-        height: 200.0,
+      ),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+        padding: EdgeInsets.all(10.0),
+        height: 140.0,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -52,48 +58,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 35.0,
-                  backgroundImage: NetworkImage(channel.profilePictureUrl),
-                ),
-                SizedBox(width: 12.0),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        channel.title,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        '${channel.subscriberCount} subscribers',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                )
-              ],
+        child: Row(
+          children: <Widget>[
+            Image(
+              width: 150.0,
+              image: NetworkImage('https://icon-icons.com/icons2/800/PNG/64/_hashtag_icon-icons.com_65804.png'),
             ),
-      ],
-      )
-      )
+            SizedBox(width: 10.0),
+            Expanded(
+              child: Text(
+                playlist.title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -101,15 +84,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: AppDrawer(),
-      appBar: CustomAppBar(title: 'Select a tournament',),
+      appBar: CustomAppBar(title: 'Select a playlist'),
       body: ListView.builder(
-          itemCount: channels.length,
-          itemBuilder: (BuildContext context, int index) {
-            print('index: $index');
-            Channel channel = channels[index];
-            return _buildChannelInfo(channel);
-          },
-        ),
-      );
+        itemCount: _playlists.length,
+        itemBuilder: (BuildContext context, int index) {
+          print('index channel screen: $index');
+          print('playlist length: ${_playlists.length}');
+          Playlist playlist = _playlists[index];
+          return _buildPlaylist(playlist);
+        },
+      ),
+    );
   }
 }

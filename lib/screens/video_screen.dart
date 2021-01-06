@@ -5,6 +5,7 @@ import 'package:youtube1/models/video_model.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/models/question_model.dart';
 import 'package:youtube1/models/shared_preferences.dart';
+import 'package:flutter_awesome_buttons/flutter_awesome_buttons.dart';
 
 class VideoScreen extends StatefulWidget {
 
@@ -15,47 +16,41 @@ class VideoScreen extends StatefulWidget {
   @override
   _VideoScreenState createState() => _VideoScreenState();
 }
+enum VideoState {
+  NONE,
+  STARTED,
+  SHOWING_ANSWERS,
+  WAITING_ON_ANSWER,
+  QUESTION_ANSWERED
+}
 
 class _VideoScreenState extends State<VideoScreen> {
   Video _video = Video();
   YoutubePlayerController _controller;
   bool _isPlayerReady = false;
-  var timeline = List<int>();
-  var nextTimeSpanToStop = 0;
-  var timelinePosition = 0;
-  //var _stops = [10,20,30];
-
-  //YoutubePlayer _youtubePlayer;
-
-  _stopVideo(){
-    print("-------------========================-----------------");
-    timelinePosition++;
-    print(timeline);
-    print(timelinePosition);
-    if(timeline.length > timelinePosition){
-      print("Trying to pause...");
-      _controller.pause();
-      nextTimeSpanToStop = timeline[timelinePosition] - timeline[timelinePosition - 1];
-      print(nextTimeSpanToStop);
-    }
-    else if(timeline.length == timelinePosition){
-      _controller.pause();
-    }
-    print("-------------========================-----------------");
-  }
+  Question _currentQuestion;
+  int _currentQuestionIndex = 0;
+  int _numQuestions = 0;
+  bool _showVideoQuestion = false;
+  VideoState _state = VideoState.NONE;
+  var _answersWidget = List<Widget>();
+  var _answersWidgetOpacity = Map<int,bool>();
 
   @override
   void initState() {
     super.initState();
     _video = widget.video;
-    widget.video.questions.forEach((key, value) {timeline.add(key); print(value);});
-    timeline.sort();
-    if(timeline.length > 0){
-      nextTimeSpanToStop = timeline[0];
+    _currentQuestion = widget.video.questions[_currentQuestionIndex];
+    _numQuestions = widget.video.questions.length;
+
+    for (var answer in _currentQuestion.answers) {
+      _answersWidgetOpacity[answer['id']] = true;
     }
 
-    print("------------------->");
-    print(timeline);
+    // Call _videoControl every second to control the video flow
+    var numSecs = Duration(seconds:1);
+    var timer = new Timer.periodic(numSecs, (Timer t) => _videoControl(t));
+
     _controller = YoutubePlayerController(
       initialVideoId: widget.video.youtubeId,
       flags: YoutubePlayerFlags(
@@ -63,46 +58,125 @@ class _VideoScreenState extends State<VideoScreen> {
         autoPlay: true,
         hideControls: true,
         hideThumbnail: true,
+        startAt: _currentQuestion.timeToStart,
       ),
     );
   }
 
   _clickedOnAnswer(int questionId, int answerId){
     var useremail = sharedPrefs.useremail;
+
+    // Hide the answers not picked by the user
+    _answersWidgetOpacity.forEach((key, value) {
+      if(answerId != key){
+        _answersWidgetOpacity[key] = false;
+      }
+    });
+
     APIService.instance
         .postQuestionResponse(useremail,questionId, answerId);
-    _controller.play();
+    _state = VideoState.QUESTION_ANSWERED;
     setState(() {
 
     });
+    _controller.play();
+  }
+
+  _videoControl(Timer t){
+    if(_state == VideoState.NONE){
+      return;
+    }
+
+    print(_controller.value.position.inSeconds);
+    var currentSecond = _controller.value.position.inSeconds;
+
+    if(_state == VideoState.STARTED && currentSecond == _currentQuestion.timeToShow){
+      print("------------------------------>Time to show: ${_currentQuestion.timeToShow}");
+      _showVideoQuestion = true;
+      _state = VideoState.SHOWING_ANSWERS;
+      setState(() {});
+    }
+
+    // TODO: Only get here if it's playing the video
+    if(_state == VideoState.SHOWING_ANSWERS && currentSecond == _currentQuestion.timeToStop){
+      print(_controller.value.playerState);
+      print("------------------------------>Time to stop: ${_currentQuestion.timeToStop}");
+      _state = VideoState.WAITING_ON_ANSWER;
+      _controller.pause();
+    }
+
+    if(currentSecond == _currentQuestion.timeToEnd){
+      // TODO: increase the number of points based on the user action
+      print("------------------------------>Time to end: ${_currentQuestion.timeToEnd}");
+      _currentQuestionIndex++;
+      if(_numQuestions > _currentQuestionIndex){
+        _currentQuestion = widget.video.questions[_currentQuestionIndex];
+        Duration nextQuestionStart = Duration(seconds:_currentQuestion.timeToStart);
+        _state = VideoState.STARTED;
+        _showVideoQuestion = false;
+        for (var answer in _currentQuestion.answers) {
+          _answersWidgetOpacity[answer['id']] = true;
+        }
+        setState(() {});
+        _controller.seekTo(nextQuestionStart);
+      }
+      else{
+        // TODO: In this case the video has no more questions. The app should return or show another video
+        print("Video finished");
+        _state = VideoState.NONE;
+      }
+
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var buttonWidget = List<Widget>();
-    Question question = _video.questions[timeline[timelinePosition]];
-    print("==============>");
-    print(question);
-    for (var answer in question.answers) {
-      buttonWidget.add(
-        RaisedButton(child: Text(answer['statement']),
-        onPressed: () => _clickedOnAnswer(question.id, answer['id']),
-        color: Colors.red,
-        textColor: Colors.yellow,
-        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-        splashColor: Colors.grey,
-      ));
-    }
+    var questionAnswers = List<Widget>();
+    _answersWidget = List<Widget>();
 
-    var oneSec = Duration(seconds:nextTimeSpanToStop);
-    var timer = new Timer(oneSec, _stopVideo);
+    // Create the answers question if there are any left
+    if(_showVideoQuestion && _numQuestions > _currentQuestionIndex) {
+      for (var answer in _currentQuestion.answers) {
+        _answersWidget.add(
+          AnimatedOpacity(
+              opacity: _answersWidgetOpacity[answer['id']]  ? 1.0 : 0.0, //
+              duration: Duration(milliseconds: 500),
+              child: PrimaryButton(
+                title: answer['statement'],
+                onPressed: () => _clickedOnAnswer(_currentQuestion.id, answer['id']),
+              )
+          )
+        );
+      }
+
+      questionAnswers.add(
+          Container(
+            padding: EdgeInsets.only(top: 30,bottom: 30),
+            child: Text(
+              _currentQuestion.statement,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          )
+      );
+      questionAnswers.add(
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: _answersWidget,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //mainAxisAlignment: MainAxisAlignment.,
         children: [
-          Text(
+        Container(
+          height: 50,
+          padding: const EdgeInsets.all(15.0),
+          child: Text(
             _video.name,
             style: TextStyle(
               color: Colors.black,
@@ -111,30 +185,21 @@ class _VideoScreenState extends State<VideoScreen> {
             ),
             overflow: TextOverflow.ellipsis,
           ),
-          YoutubePlayer(
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            bottomActions: [
-              CurrentPosition(),
-              ProgressBar(isExpanded: true),
-            ],
-            onReady: () {
-              _isPlayerReady = true;
-              print('Player is ready.');
-            },
-          ),
-          Container(
-            child: Text(
-              question.statement,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: buttonWidget,
-          ),
+        ),
+        YoutubePlayer(
+          controller: _controller,
+          showVideoProgressIndicator: true,
+          bottomActions: [
+            CurrentPosition(),
+            ProgressBar(isExpanded: true),
+          ],
+          onReady: () {
+            _isPlayerReady = true;
+            _state = VideoState.STARTED;
+            print('Player is ready.');
+          },
+        ),
+          ...questionAnswers,
         ],
       )
     );

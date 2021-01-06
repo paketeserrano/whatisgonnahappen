@@ -15,7 +15,7 @@ class APIService {
   static final APIService instance = APIService._instantiate();
 
   final String _baseYoutubeUrl = 'www.googleapis.com';
-  final String _baseSoccerFansUrl = '127.0.0.1:5000';
+  final String _serverUrl = '192.168.1.233:5000'; //'127.0.0.1:5000';
   String _nextPageToken = '';
   String _nextPlaylistPageToken = '';
 
@@ -23,7 +23,7 @@ class APIService {
     // Get the channels from database
 
     Uri sfUri = Uri.http(
-        _baseSoccerFansUrl,
+        _serverUrl,
         '/getChannels'
     );
 
@@ -34,6 +34,7 @@ class APIService {
 
     // Get Channels (Tournaments, like La Liga)
     // Important: In command line execute 'adb reverse tcp:5000 tcp:5000' so flask and flutter app endpoints can connect
+    // For a real phone adb -s 9b6ea4eb reverse tcp:5000 tcp:5000 where 9b6ea4eb is the device id listed in adb devices
     var response = await http.get(sfUri, headers: headers);
     List<dynamic> channelsInfo;
 
@@ -76,15 +77,15 @@ class APIService {
     return channels;
   }
 
-  Future<List<Playlist>> fetchChannelPlaylists({Channel channel}) async {
+  Future<List<Playlist>> fetchPlaylists() async {
     List<Playlist> playlists = [];
 
     Map<String, String> parameters = {
-      'chid': channel.id,
+      'plid': '-1',
     };
 
     Uri sfUri = Uri.http(
-        _baseSoccerFansUrl,
+        _serverUrl,
         '/getPlaylists',
         parameters
     );
@@ -110,45 +111,11 @@ class APIService {
       throw json.decode(response.body)['error']['message'];
     }
 
-    String playlistIds = '';
-    playlistsInfo.forEach((playlistInfo) {playlistIds = playlistIds + playlistInfo['youtube_id'] + ',';});
+    playlistsInfo.forEach((playlistInfo) {
+      Playlist playlist = Playlist.fromMap(playlistInfo);
+      playlists.add(playlist);
+    });
 
-    parameters = {
-      'part': 'snippet, contentDetails',
-      'id': playlistIds,
-      'key': API_KEY,
-      'maxResults': '100',
-      'pageToken': _nextPlaylistPageToken,
-    };
-
-    Uri uri = Uri.https(
-      _baseYoutubeUrl,
-      '/youtube/v3/playlists',
-      parameters,
-    );
-
-    // Get Channel
-    response = await http.get(uri, headers: headers);
-    if (response.statusCode == 200) {
-      var playlistResponse = json.decode(response.body);
-      List<dynamic> playlistsJson = playlistResponse['items'];
-
-      playlistsJson.forEach((playlistJson) {
-        print(playlistJson['snippet']['title']);
-        Playlist playlist = Playlist.fromMap(playlistJson);
-        for(var index = 0; index < playlistsInfo.length; index++) {
-          var playlistInfoYoutubeId = playlistsInfo[index]['youtube_id'];
-          if (playlistInfoYoutubeId == playlist.id) {
-            playlist.title = playlistsInfo[index]['name'];
-            playlist.channelId = playlistsInfo[index]['channel_id'].toString();
-            playlist.id = playlistsInfo[index]['id'].toString();
-          }
-        }
-        playlists.add(playlist);
-      });
-    } else {
-      throw json.decode(response.body)['error']['message'];
-    }
     return playlists;
   }
 
@@ -160,7 +127,7 @@ class APIService {
     };
 
     Uri sfUri = Uri.http(
-        _baseSoccerFansUrl,
+        _serverUrl,
         '/getVideos',
         parameters
     );
@@ -177,9 +144,6 @@ class APIService {
 
     if (response.statusCode == 200) {
       videosInfo = json.decode(response.body)['videos'];
-      //print('[[[[[[[[[[[[[[[[[[[[[');
-      //print(videosInfo);
-      //print('[[[[[[[[[[[[[[[[[[[[[');
       videosInfo.forEach((videoInfo) {
         Video video = Video.fromMap(videoInfo);
         videos.add(video);
@@ -243,7 +207,7 @@ class APIService {
         List<Video> videosToPost = List<Video>();
         incompleteVideos.forEach((key, video) { videosToPost.add(video);});
         sfUri = Uri.http(
-            _baseSoccerFansUrl,
+            _serverUrl,
             '/updateVideos'
         );
 
@@ -274,7 +238,7 @@ class APIService {
     };
 
     Uri sfUri = Uri.http(
-        _baseSoccerFansUrl,
+        _serverUrl,
         '/postQuestionResponse'
     );
 
@@ -289,7 +253,7 @@ class APIService {
     };
 
     Uri sfUri = Uri.http(
-        _baseSoccerFansUrl,
+        _serverUrl,
         '/addVideo'
     );
 
@@ -319,7 +283,7 @@ class APIService {
   Future<http.Response> logoutUser() async {
 
       Uri sfUri = Uri.http(
-          _baseSoccerFansUrl,
+          _serverUrl,
           '/logout'
       );
 
