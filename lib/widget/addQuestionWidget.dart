@@ -148,7 +148,7 @@ class QuestionWidgetState extends State<QuestionWidget>{
               TextFormField(
                 controller: officialAnswer,
                 decoration: const InputDecoration(
-                  labelText: 'Official Answer (optional)',
+                  labelText: 'Official Answer number (1,2 or 3) (optional)',
                 ),
               ),
             ],

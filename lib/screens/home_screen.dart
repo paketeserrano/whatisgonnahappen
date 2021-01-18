@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:youtube1/models/channel_model.dart';
 import 'package:youtube1/models/playlist_model.dart';
+import 'package:youtube1/models/shared_preferences.dart';
 import 'package:youtube1/screens/playlist_screen.dart';
+import 'package:youtube1/screens/hashtag_list_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
+import 'package:youtube1/screens/video_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,8 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Playlist> _playlists = List<Playlist>();
-  bool _isLoading = false;
+  final GlobalKey<CustomAppBarState> customBarStateKey = GlobalKey<CustomAppBarState>();
 
   @override
   void initState() {
@@ -22,77 +23,73 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _initHome() async {
-    var playlists = await APIService.instance
-        .fetchPlaylists();
-
-    print('<------------>');
-    print(playlists);
-    print(playlists.length);
-    print('<------------>');
-
     setState(() {
-      print('----------- In the set state function');
-      _playlists = playlists;
     });
-  }
-
-  _buildPlaylist(Playlist playlist) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PlaylistScreen(playlist),
-        ),
-      ),
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
-        padding: EdgeInsets.all(10.0),
-        height: 140.0,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 1),
-              blurRadius: 6.0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: <Widget>[
-            Image(
-              width: 150.0,
-              image: NetworkImage('https://icon-icons.com/icons2/800/PNG/64/_hashtag_icon-icons.com_65804.png'),
-            ),
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Text(
-                playlist.title,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       drawer: AppDrawer(),
-      appBar: CustomAppBar(title: 'Select a playlist'),
-      body: ListView.builder(
-        itemCount: _playlists.length,
-        itemBuilder: (BuildContext context, int index) {
-          print('index channel screen: $index');
-          print('playlist length: ${_playlists.length}');
-          Playlist playlist = _playlists[index];
-          return _buildPlaylist(playlist);
-        },
+      appBar: CustomAppBar(key: customBarStateKey, title: 'Home'),
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text("Home"),
+            onTap: () {
+              print("Home Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.play_arrow_outlined),
+            title: Text("Play Random Vids"),
+            onTap: () {
+              print("Play Random Vids Clicked");
+              APIService.instance.fetchRandomVideo().then((video){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VideoScreen(video)),
+                );
+              });
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.featured_play_list_outlined),
+            title: Text("Play a Hashtag List"),
+            onTap: () {
+              print("Play a Hashtag List Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HashtagListScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Play a Group Game"),
+            onTap: () {
+              print("Play a group game Clicked");
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Play as developer"),
+            onTap: () {
+              print("Play aa developer game Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HashtagListScreen()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

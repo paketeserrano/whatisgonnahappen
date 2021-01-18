@@ -4,6 +4,7 @@ import 'package:youtube1/models/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube1/screens/login.page.dart';
 import 'package:youtube1/screens/add_videos_screen.dart';
+import 'package:countup/countup.dart';
 
 class CustomAppBar extends StatefulWidget  implements PreferredSizeWidget {
   String barTitle;
@@ -15,8 +16,7 @@ class CustomAppBar extends StatefulWidget  implements PreferredSizeWidget {
   @override
   final Size preferredSize; // default is 56.0
 
-  @override
-  _CustomAppBarState createState() => _CustomAppBarState();
+  @override CustomAppBarState createState() => CustomAppBarState();
 
 }
 
@@ -40,12 +40,36 @@ List<PopupMenuEntry<String>> getPopupMenuItems(){
   return popupItems;
 }
 
-class _CustomAppBarState extends State<CustomAppBar>{
+class CustomAppBarState extends State<CustomAppBar>{
+  int oldUserScore;
+  int userScore;
+  @override
+  void initState() {
+    userScore = sharedPrefs.userscore;
+    oldUserScore = sharedPrefs.userscore;
+  }
+
+  setScore(score){
+    oldUserScore = score;
+    userScore = score;
+  }
+
   @override
   PreferredSizeWidget build(BuildContext context){
+    oldUserScore = userScore;
+    userScore = sharedPrefs.userscore;
     return AppBar(
       title: Text('${widget.barTitle}'),
       actions: <Widget>[
+        Countup(
+          begin: oldUserScore.toDouble(),
+          end: userScore.toDouble(),
+          duration: Duration(seconds: 1),
+          separator: ',',
+          style: TextStyle(
+            fontSize: 36,
+          ),
+        ),
         PopupMenuButton<String>(
           icon: CircleAvatar(
               backgroundImage: NetworkImage('https://www.woolha.com/media/2020/03/eevee.png')

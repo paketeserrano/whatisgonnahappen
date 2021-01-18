@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:youtube1/models/channel_model.dart';
 import 'package:youtube1/models/playlist_model.dart';
 import 'package:youtube1/models/video_model.dart';
 import 'package:youtube1/screens/video_screen.dart';
 import 'package:youtube1/services/api_service.dart';
+import 'package:youtube1/widget/custom_app_bar.dart';
+import 'package:youtube1/models/shared_preferences.dart';
 
 class PlaylistScreen extends StatefulWidget {
   Playlist playlist;
@@ -16,6 +17,9 @@ class PlaylistScreen extends StatefulWidget {
 class _PlaylistScreenState extends State<PlaylistScreen> {
   Playlist _playlist;
   List<Video> _videos = List<Video>();
+  final GlobalKey<CustomAppBarState> customBarStateKey = GlobalKey<CustomAppBarState>();
+  ThemeData _theme;
+
 
   @override
   void initState(){
@@ -24,7 +28,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   }
 
   _initPlaylist() async {
-
     List<Video> videos = await APIService.instance
         .fetchPlaylistVideos(playlist:widget.playlist);
 
@@ -91,13 +94,14 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         MaterialPageRoute(
           builder: (_) => VideoScreen(video),
         ),
-      ),
+      ).then((value) {customBarStateKey.currentState.setScore(sharedPrefs.userscore); setState(() {});}),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
         padding: EdgeInsets.all(10.0),
         height: 140.0,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _theme.colorScheme.secondary,
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
@@ -130,10 +134,10 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("--------------------------------------> Building Playlist Screen");
+    _theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Hashtags'),
-      ),
+      appBar: CustomAppBar(key: customBarStateKey, title: 'Hashtags'),
       body: ListView.builder(
           itemCount: 1 + _videos.length,
           itemBuilder: (BuildContext context, int index) {

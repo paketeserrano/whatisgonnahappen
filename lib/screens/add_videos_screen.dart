@@ -128,15 +128,6 @@ class _AddVideosScreenState extends State<AddVideosScreen>{
                               }
                               questionMap['answers'] = answersList;
                               questionList.add(questionMap);
-
-                              /*
-                              print(key.currentState.question.text);
-                              print(key.currentState.time.text);
-                              print(key.currentState.answer1.text);
-                              print(key.currentState.answer2.text);
-                              print(key.currentState.answer3.text);
-                              print(key.currentState.officialAnswer.text);
-                              */
                             });
 
                             video['questions'] = questionList;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:youtube1/screens/login.page.dart';
 import 'package:youtube1/models/shared_preferences.dart';
 import 'package:youtube1/screens/home_screen.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 //void main() => runApp(MyApp());
 
@@ -21,12 +22,21 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    ThemeData baseThemeData = FlexColorScheme.light(
+                                colors: FlexColor.schemes[FlexScheme.aquaBlue].light,
+                              ).toTheme;
+    /*
+    ThemeData myModifiedFlexScheme = baseThemeData.copyWith(
+      textTheme:
+
+    );
+
+     */
+
     return MaterialApp(
-      title: 'Flutter YouTube API',
+      title: 'Quansers',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Colors.green,
-      ),
+      theme: baseThemeData,
       home: renderFirstPage(),
     );
   }

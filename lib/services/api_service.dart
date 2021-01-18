@@ -119,6 +119,32 @@ class APIService {
     return playlists;
   }
 
+  Future<Video> fetchRandomVideo() async {
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/getRandomVideo'
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    var video;
+    var response = await http.get(sfUri, headers: headers);
+    if (response.statusCode == 200) {
+      var videoInfo = json.decode(response.body)['video'];
+      video = Video.fromMap(videoInfo);
+      print("---------------------------");
+      print(videoInfo);
+      print("---------------------------");
+    } else {
+      throw json.decode(response.body)['error']['message'];
+    }
+
+    return video;
+  }
+
   Future<List<Video>> fetchPlaylistVideos({Playlist playlist}) async {
     List<Video> videos = [];
 
@@ -226,7 +252,7 @@ class APIService {
     return videos;
   }
 
-  void postQuestionResponse(String useremail, int questionId, int answerId) async {
+  Future<int> postQuestionResponse(String useremail, int questionId, int answerId) async {
     Map<String, String> headers = {
       'cookie': sharedPrefs.usersessiontoken,
       HttpHeaders.contentTypeHeader: 'application/json',
@@ -243,7 +269,17 @@ class APIService {
     );
 
     final http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(parameters));
-    print('Response-----: ${response.statusCode}');
+    var userScore = sharedPrefs.userscore;
+    if (response.statusCode == 200) {
+      var responseBody = json.decode(response.body);
+      var responseStatus = int.parse(responseBody['status']);
+      print("responseStatus: $responseStatus");
+      if(responseStatus == 200){
+        print("Response score:  ${responseBody['score']}");
+        return responseBody['score'];
+      }
+    }
+    return userScore;
   }
 
   void addVideo(Map<String,dynamic> video) async {

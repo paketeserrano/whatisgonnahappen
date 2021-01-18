@@ -5,6 +5,7 @@ class SharedPrefs {
 
   static const String keyUsername = "username";
   static const String keyUserEmail = "useremail";
+  static const String keyUserScore = "userscore";
   static const String keyUserLoggedIn = "isloggedin";
   static const String keyUserSessionToken = "usersessiontoken";
   static const String keyUserRole = "userroletoken";
@@ -25,6 +26,12 @@ class SharedPrefs {
 
   set useremail(String value) {
     _sharedPrefs.setString(keyUserEmail, value);
+  }
+
+  int get userscore => _sharedPrefs.getInt(keyUserScore) ?? 0;
+
+  set userscore(int value) {
+    _sharedPrefs.setInt(keyUserScore, value);
   }
 
   String get userrole => _sharedPrefs.getString(keyUserRole) ?? "";

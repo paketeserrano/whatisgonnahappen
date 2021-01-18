@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       print(user);
       sharedPrefs.username = user['username'];
       sharedPrefs.useremail = user['email'];
+      sharedPrefs.userscore = user['score'];
       sharedPrefs.isloggedin = true;
       sharedPrefs.userrole = user['role'];
 

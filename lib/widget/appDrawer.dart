@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:youtube1/models/shared_preferences.dart';
+import 'package:youtube1/screens/home_screen.dart';
+import 'package:youtube1/screens/hashtag_list_screen.dart';
+import 'package:youtube1/services/api_service.dart';
+import 'package:youtube1/screens/video_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -8,31 +13,65 @@ class AppDrawer extends StatelessWidget {
 // through the options in the drawer if there isn't enough vertical
 // space to fit everything.
       child: ListView(
-// Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            child: Text('Select Game'),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
+          UserAccountsDrawerHeader(
+            accountName: Text(sharedPrefs.username),
+            accountEmail: Text('${sharedPrefs.useremail} | Score: ${sharedPrefs.userscore}'),
+            currentAccountPicture: new Image.network('https://www.woolha.com/media/2020/03/eevee.png'),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryVariant),
           ),
           ListTile(
-            title: Text('Play Country Leagues'),
+            leading: Icon(Icons.home),
+            title: Text("Home"),
             onTap: () {
-// Update the state of the app
-// ...
-// Then close the drawer
-              Navigator.pop(context);
+              print("Home Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
             },
           ),
           ListTile(
-            title: Text('Item 2'),
+            leading: Icon(Icons.play_arrow_outlined),
+            title: Text("Play Random Vids"),
             onTap: () {
-// Update the state of the app
-// ...
-// Then close the drawer
-              Navigator.pop(context);
+              print("Play Random Vids Clicked");
+              APIService.instance.fetchRandomVideo().then((video){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VideoScreen(video)),
+                );
+              });
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.featured_play_list_outlined),
+            title: Text("Play a Hashtag List"),
+            onTap: () {
+              print("Play a Hashtag List Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HashtagListScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Play a Group Game"),
+            onTap: () {
+              print("Play a group game Clicked");
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Play as developer"),
+            onTap: () {
+              print("Play aa developer game Clicked");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
             },
           ),
         ],
