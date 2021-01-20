@@ -8,6 +8,19 @@ import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
 import 'package:youtube1/screens/video_screen.dart';
 
+// IDEAS:
+// - Periodic Competitions:
+//   - Player with more points globally
+//   - "" with more points by month, week and day
+//   - We can even split by country if we get enough users
+//   - Winner will get a trophy
+//   - We need to add standings list and maybe sporadic messages when they are close to pass somebody in the classification
+
+// - On Demand challenges
+//   - User challenges a user to see who makes more points on a day, week or month
+
+// - Multiplayer mode
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();

@@ -31,7 +31,7 @@ class _VideoScreenState extends State<VideoScreen> {
   Video _video = Video();
   YoutubePlayerController _controller;
   bool _isPlayerReady ;
-  YoutubePlayer _youtubePlayerWidget;
+  YoutubePlayerBuilder _youtubePlayerWidget;
   int _selectedAnswerId;  // It holds the answer selected by the user for the current question
   Question _currentQuestion;
   int _currentQuestionIndex;
@@ -44,6 +44,7 @@ class _VideoScreenState extends State<VideoScreen> {
   var _questionAnswers;
   Timer _timer;
   final GlobalKey<CustomAppBarState> customBarStateKey = GlobalKey<CustomAppBarState>();
+  ThemeData _theme;
 
   _initPage(Video video){
     _video = video;
@@ -81,7 +82,7 @@ class _VideoScreenState extends State<VideoScreen> {
       flags: YoutubePlayerFlags(
         mute: false,
         autoPlay: true,
-        hideControls: true,
+        hideControls: false,
         hideThumbnail: true,
         startAt: _currentQuestion.timeToStart,
       ),
@@ -151,8 +152,6 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   _videoControl(Timer t){
-    print("--------------------=> ${DateTime.now().second}");
-
     if(_state == VideoState.NONE){
       return;
     }
@@ -219,12 +218,24 @@ class _VideoScreenState extends State<VideoScreen> {
       _questionAnswers.add(
           Container(
             padding: EdgeInsets.only(bottom: 50, top:30,left: 10,right: 10)  ,//.all(10),//.only(top: 30, bottom: 30),
-              child: Text(
-                _currentQuestion.statement,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-              ),
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _theme.colorScheme.secondary,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  color: _theme.colorScheme.secondary
+                ),
+                child: Center(
+                  heightFactor: 2,
+                  child: Text(
+                    _currentQuestion.statement,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+                  ),
+                ),
+              )
           )
       );
 
@@ -255,7 +266,7 @@ class _VideoScreenState extends State<VideoScreen> {
 
       answersSectionWidget.add(
           Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: _answersWidget,
           )
       );
@@ -268,8 +279,36 @@ class _VideoScreenState extends State<VideoScreen> {
     }
   }
 
+
   _createYoutubePlayer(){
-    _youtubePlayerWidget = YoutubePlayer(
+
+    _youtubePlayerWidget = YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          controller: _controller,
+          showVideoProgressIndicator: false,
+          bottomActions: [
+            CurrentPosition(),
+            ProgressBar(isExpanded: true),
+          ],
+          onReady: () {
+            _isPlayerReady = true;
+            _state = VideoState.STARTED;
+            print('Player is ready.');
+          },
+        ),
+        builder: (context, player) {
+          return Column(
+            children: [
+              // some widgets
+              player,
+              //some other widgets
+            ],
+          );
+        }
+          );
+/*
+  _createYoutubePlayer(){
+    _youtubePlayerWidget  = YoutubePlayer(
       controller: _controller,
       showVideoProgressIndicator: true,
       bottomActions: [
@@ -282,21 +321,18 @@ class _VideoScreenState extends State<VideoScreen> {
         print('Player is ready.');
       },
     );
+   }
+*/
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _createAnswerQuestionsWidget();
-    print("--------------------------------------------------> Rendering the page");
-    return Scaffold(
-      drawer: AppDrawer(),
-      appBar: CustomAppBar(key: customBarStateKey,title: 'Videos'),
-      body: Column(
-        //mainAxisAlignment: MainAxisAlignment.,
-        children: [
+  Widget _getPortraitView(){
+    return ListView(
+      //mainAxisAlignment: MainAxisAlignment.center,
+
+      children: [
         Container(
-          height: 50,
-          padding: const EdgeInsets.all(15.0),
+          height: 70,
+          padding: const EdgeInsets.all(10.0),
           child: Text(
             _video.name,
             style: TextStyle(
@@ -307,11 +343,72 @@ class _VideoScreenState extends State<VideoScreen> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        _youtubePlayerWidget,
-          ..._questionAnswers,
-          //..._test,
-        ],
-      )
+        Container(
+                child: _youtubePlayerWidget
+        ),
+        Column(
+          children: _questionAnswers,
+        )
+      ],
     );
+  }
+
+  Widget _getPlanLandscapeView(){
+    return Stack(
+        children: [
+          Container(
+            child: _youtubePlayerWidget
+          ),
+          Align(
+            widthFactor: 2,
+            alignment: Alignment.centerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _questionAnswers,
+            ),
+          )
+        ]
+    );
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _theme = Theme.of(context);
+    _createAnswerQuestionsWidget();
+    print("--------------------------------------------------> Rendering the page");
+
+    return OrientationBuilder(
+        builder: (context, orientation) {
+          return Scaffold(
+            drawer: AppDrawer(),
+            appBar: CustomAppBar(key: customBarStateKey,title: 'Videos'),
+            body: Center(
+                      child: orientation == Orientation.portrait
+                          ? _getPortraitView()
+                          : _getPlanLandscapeView()
+
+                  ),
+          );
+        }
+    );
+    /*
+    return Scaffold(
+      drawer: AppDrawer(),
+      appBar: CustomAppBar(key: customBarStateKey,title: 'Videos'),
+      body: OrientationBuilder(
+          builder: (context, orientation) {
+            return Center(
+
+                child: orientation == Orientation.portrait
+                    ? _getPortraitView()
+                    : _getPlanLandscapeView()
+
+            );
+          }
+      ),
+    );
+
+     */
   }
 }
