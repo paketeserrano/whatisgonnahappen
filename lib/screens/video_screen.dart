@@ -76,13 +76,12 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   _loadVideo(){
-    //createTest(video.youtubeId);
     _controller = YoutubePlayerController(
       initialVideoId: _video.youtubeId,
       flags: YoutubePlayerFlags(
         mute: false,
         autoPlay: true,
-        hideControls: false,
+        hideControls: true,
         hideThumbnail: true,
         startAt: _currentQuestion.timeToStart,
       ),
@@ -116,7 +115,6 @@ class _VideoScreenState extends State<VideoScreen> {
       _controller.seekTo(nextQuestionStart);
     }
     else{
-      // TODO: In this case the video has no more questions. The app should return or show another video
       APIService.instance.fetchRandomVideo().then((video){
         print("---------------------------> Trying to change to a new videooooooooooooooooooooooooooooo");
         _timer.cancel();
@@ -194,7 +192,7 @@ class _VideoScreenState extends State<VideoScreen> {
       if (_showQuestionAnswers && _numQuestions > _currentQuestionIndex) {
         for (var answer in _currentQuestion.answers) {
           _answersWidget.add(
-              Center(
+              Container(
                 child:
                   AnimatedOpacity(
                   opacity: _answersWidgetOpacity[answer['id']] ? 1.0 : 0.0, //
@@ -281,7 +279,6 @@ class _VideoScreenState extends State<VideoScreen> {
 
 
   _createYoutubePlayer(){
-
     _youtubePlayerWidget = YoutubePlayerBuilder(
         player: YoutubePlayer(
           controller: _controller,
@@ -304,25 +301,8 @@ class _VideoScreenState extends State<VideoScreen> {
               //some other widgets
             ],
           );
-        }
-          );
-/*
-  _createYoutubePlayer(){
-    _youtubePlayerWidget  = YoutubePlayer(
-      controller: _controller,
-      showVideoProgressIndicator: true,
-      bottomActions: [
-        CurrentPosition(),
-        ProgressBar(isExpanded: true),
-      ],
-      onReady: () {
-        _isPlayerReady = true;
-        _state = VideoState.STARTED;
-        print('Player is ready.');
-      },
+        },
     );
-   }
-*/
   }
 
   Widget _getPortraitView(){
@@ -359,14 +339,10 @@ class _VideoScreenState extends State<VideoScreen> {
           Container(
             child: _youtubePlayerWidget
           ),
-          Align(
-            widthFactor: 2,
-            alignment: Alignment.centerLeft,
-            child: Column(
+          Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: _questionAnswers,
             ),
-          )
         ]
     );
 
@@ -376,13 +352,12 @@ class _VideoScreenState extends State<VideoScreen> {
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     _createAnswerQuestionsWidget();
-    print("--------------------------------------------------> Rendering the page");
 
     return OrientationBuilder(
         builder: (context, orientation) {
           return Scaffold(
-            drawer: AppDrawer(),
-            appBar: CustomAppBar(key: customBarStateKey,title: 'Videos'),
+            drawer: orientation == Orientation.portrait ? AppDrawer() : null,
+            appBar: orientation == Orientation.portrait ? CustomAppBar(key: customBarStateKey,title: 'Videos') : null,
             body: Center(
                       child: orientation == Orientation.portrait
                           ? _getPortraitView()
