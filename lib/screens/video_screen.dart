@@ -8,6 +8,12 @@ import 'package:youtube1/models/shared_preferences.dart';
 import 'package:flutter_awesome_buttons/flutter_awesome_buttons.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
 import 'package:youtube1/widget/appDrawer.dart';
+//import 'package:flutter_countdown_timer/countdown.dart';
+//import 'package:flutter_countdown_timer/countdown_controller.dart';
+//import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
+//import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:flutter_countdown_timer/index.dart';
 
 class VideoScreen extends StatefulWidget {
 
@@ -36,8 +42,6 @@ class _VideoScreenState extends State<VideoScreen> {
   Question _currentQuestion;
   int _currentQuestionIndex;
   int _numQuestions;
-  bool _showQuestionAnswers;
-  bool _showVideoQuestion;
   VideoState _state;
   var _answersWidget;
   var _answersWidgetOpacity;
@@ -45,6 +49,7 @@ class _VideoScreenState extends State<VideoScreen> {
   Timer _timer;
   final GlobalKey<CustomAppBarState> customBarStateKey = GlobalKey<CustomAppBarState>();
   ThemeData _theme;
+  Orientation _currentOrientation;
 
   _initPage(Video video){
     _video = video;
@@ -53,8 +58,6 @@ class _VideoScreenState extends State<VideoScreen> {
     _selectedAnswerId = -1;  // It holds the answer selected by the user for the current question
     _currentQuestionIndex = 0;
     _numQuestions = 0;
-    _showQuestionAnswers = false;
-    _showVideoQuestion = false;
     _state = VideoState.NONE;
     _answersWidget = List<Widget>();
     _answersWidgetOpacity = Map<int,bool>();
@@ -106,8 +109,6 @@ class _VideoScreenState extends State<VideoScreen> {
       _currentQuestion = _video.questions[_currentQuestionIndex];
       Duration nextQuestionStart = Duration(seconds:_currentQuestion.timeToStart);
       _state = VideoState.STARTED;
-      _showQuestionAnswers = false;
-      _showVideoQuestion = false;
       for (var answer in _currentQuestion.answers) {
         _answersWidgetOpacity[answer['id']] = true;
       }
@@ -159,7 +160,6 @@ class _VideoScreenState extends State<VideoScreen> {
 
     if(_state == VideoState.STARTED && currentSecond == _currentQuestion.timeToShow){
       print("------------------------------>Time to show: ${_currentQuestion.timeToShow}");
-      _showVideoQuestion = true;
       _state = VideoState.SHOWING_ANSWERS;
       setState(() {});
     }
@@ -167,7 +167,6 @@ class _VideoScreenState extends State<VideoScreen> {
     if(_state == VideoState.SHOWING_ANSWERS && currentSecond == _currentQuestion.timeToStop){
       print(_controller.value.playerState);
       print("------------------------------>Time to stop: ${_currentQuestion.timeToStop}");
-      _showQuestionAnswers = true;
       _state = VideoState.WAITING_ON_ANSWER;
       _controller.pause();
       setState(() {});
@@ -176,9 +175,6 @@ class _VideoScreenState extends State<VideoScreen> {
     if(_state == VideoState.QUESTION_ANSWERED && currentSecond == _currentQuestion.timeToEnd){
       print("------------------------------>Time to end: ${_currentQuestion.timeToEnd}");
       _controller.pause();
-      for (var answer in _currentQuestion.answers) {
-        _answersWidgetOpacity[answer['id']] = false;
-      }
       _state = VideoState.QUESTION_SUMMARY;
       setState(() {});
     }
@@ -187,12 +183,13 @@ class _VideoScreenState extends State<VideoScreen> {
   _createAnswerQuestionsWidget(){
     _questionAnswers = List<Widget>();
     _answersWidget = List<Widget>();
-    if(_showVideoQuestion) {
+    if(_state != VideoState.NONE && _state != VideoState.STARTED) {
       // Create the answers question if there are any left
-      if (_showQuestionAnswers && _numQuestions > _currentQuestionIndex) {
+      print("===================>>> STATE: ${_state.toString()}");
+      if ( (_state == VideoState.WAITING_ON_ANSWER) && _numQuestions > _currentQuestionIndex) {
         for (var answer in _currentQuestion.answers) {
           _answersWidget.add(
-              Container(
+              Center(
                 child:
                   AnimatedOpacity(
                   opacity: _answersWidgetOpacity[answer['id']] ? 1.0 : 0.0, //
@@ -212,66 +209,180 @@ class _VideoScreenState extends State<VideoScreen> {
           );
         }
       }
-
-      _questionAnswers.add(
-          Container(
-            padding: EdgeInsets.only(bottom: 50, top:30,left: 10,right: 10)  ,//.all(10),//.only(top: 30, bottom: 30),
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                      color: _theme.colorScheme.secondary,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  color: _theme.colorScheme.secondary
-                ),
-                child: Center(
-                  heightFactor: 2,
-                  child: Text(
-                    _currentQuestion.statement,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.visible,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-                  ),
-                ),
-              )
-          )
-      );
+      else if(_state == VideoState.QUESTION_ANSWERED){
+        for (var answer in _currentQuestion.answers) {
+          if(answer['id'] == _selectedAnswerId){
+            _answersWidget.add(
+                Center(
+                    child:
+                    AnimatedOpacity(
+                        opacity: _answersWidgetOpacity[answer['id']] ? 1.0 : 0.0, //
+                        duration: Duration(milliseconds: 500),
+                        child: Container(
+                            padding: EdgeInsets.only(bottom: 15),
+                            child: RaisedButton(
+                              child: Text(
+                                answer['statement'],
+                              ),
+                            )
+                        )
+                    )
+                )
+            );
+          }
+        }
+      }
 
       var answersSectionWidget = List<Widget>();
-      bool answerIsCorrect = _currentQuestion.officialAnswerId == _selectedAnswerId;
-      answersSectionWidget.add(
-        Center(
-          child: AnimatedOpacity(
-              opacity: _state == VideoState.QUESTION_SUMMARY ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 1000),
-              onEnd: () { _prepareForNextQuestion();},
-              child: Container(
-                decoration: BoxDecoration(
-                  color: answerIsCorrect ? Colors.green : Colors.red,
-                ),
-                child: Text(
-                  answerIsCorrect ? 'Correct!' : 'Nope',
-                  style: TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )
-        )
-      );
-
       answersSectionWidget.add(
           Column(
-            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: _answersWidget,
           )
       );
 
+      if(_state != VideoState.QUESTION_SUMMARY) {
+        _questionAnswers.add(
+            Container(
+                padding: EdgeInsets.only(
+                    bottom: 20, top: 30, left: 10, right: 10),
+                //.all(10),//.only(top: 30, bottom: 30),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        color: _theme.colorScheme.secondary,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: _theme.colorScheme.secondary
+                  ),
+                  child: Center(
+                    heightFactor: 2,
+                    child: Text(
+                      _currentQuestion.statement,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.visible,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 20.0),
+                    ),
+                  ),
+                )
+            )
+        );
+      }
+
+      var summarySectionWidget = List<Widget>();
+      if(_state == VideoState.QUESTION_SUMMARY) {
+        bool answerIsCorrect = _currentQuestion.officialAnswerId == _selectedAnswerId;
+        int endTime = DateTime
+            .now()
+            .millisecondsSinceEpoch + 1000 * 5;
+        summarySectionWidget.add(
+            Center(
+                child: Visibility(
+                  visible: _state == VideoState.QUESTION_SUMMARY ? true : false,
+                  child: Container(
+                    margin: const EdgeInsets.all(10.0),
+                    //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                    decoration: BoxDecoration(
+                      //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      border: Border.all(
+                        color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                      ),
+                    ),
+                    child: Column(
+                        children: [
+                          Text(
+                            answerIsCorrect ? 'Correct!' : 'Nope',
+                            style: TextStyle(
+                                fontSize: 50,
+                                fontWeight: FontWeight.bold,
+                                color: answerIsCorrect ? Colors.green : _theme.colorScheme.error
+                            ),
+                          ),
+                          Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                  IconButton(
+                                    icon: Icon(Icons.thumb_up_alt_outlined,
+                                      size: 100,
+                                      color: _theme.colorScheme
+                                          .primaryVariant,),
+                                    onPressed: () {
+                                      print("Thumbs up!!!!!!!!!!!!!!!!");
+                                    },
+                                  ),
+                                ),
+                                Expanded(
+                                  child:
+                                  IconButton(
+                                    icon: Icon(Icons.thumb_down_alt_outlined,
+                                        size: 100,
+                                        color: _theme.colorScheme
+                                            .primaryVariant),
+                                    onPressed: () {
+                                      print("Thumbs down!!!!!!!!!!!!!!!!");
+                                    },
+                                  ),
+                                ),
+                              ]
+                          ),
+                          Column(
+                              children: [
+                                Text(
+                                  'Vote! or...',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: _theme.colorScheme.secondary
+                                  ),
+                                ),
+                                //Countdown(
+                                //  countdownController: _countdownController
+                                //),
+                                CountdownTimer(
+                                  endTime: endTime,
+                                  onEnd: _prepareForNextQuestion,
+                                  widgetBuilder: (_,
+                                      CurrentRemainingTime time) {
+                                    print(
+                                        "++++++++++++++++++++++>>>>>>>>>>>>>> 'In the widget builder: ${time
+                                            .toString()}");
+                                    if (time == null) {
+                                      return Text('0');
+                                    }
+                                    return Text(
+                                      '${time.sec}',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: _theme.colorScheme
+                                              .primaryVariant
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Text(
+                                  'For next video',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: _theme.colorScheme.secondary
+                                  ),
+                                ),
+                              ]
+                          ),
+                        ]
+                    ),
+                  ),
+                )
+            )
+        );
+      }
+
       _questionAnswers.add(
-          Stack(
-            children: answersSectionWidget
+          Column(
+            children: _state == VideoState.QUESTION_SUMMARY ? summarySectionWidget : answersSectionWidget
           )
       );
     }
@@ -293,6 +404,8 @@ class _VideoScreenState extends State<VideoScreen> {
             print('Player is ready.');
           },
         ),
+        onEnterFullScreen: (){print("========================================>>> Entering FULL SCREEN");},
+        onExitFullScreen: (){print("========================================>>> Exiting FULL SCREEN");},
         builder: (context, player) {
           return Column(
             children: [
@@ -348,6 +461,30 @@ class _VideoScreenState extends State<VideoScreen> {
 
   }
 
+  /*
+  _recoverVideo(Orientation newOrientation){
+    if(_currentOrientation == null){
+      print("===========================> Assigning first value to current orientation");
+      _currentOrientation = newOrientation;
+    }
+
+    if(_currentOrientation != newOrientation){
+      print("===========================> Changing to new orientation");
+      Duration curPos = Duration(seconds: _controller.value.position.inSeconds);
+      _currentOrientation = newOrientation;
+      _controller.pause();
+      Future.delayed(Duration(milliseconds: 4000)).then((e) {
+        print("================================>NOW I am trying to go to the right video position");
+        _controller.seekTo(curPos);
+        _controller.play();
+      });
+    }
+
+  }
+
+   */
+
+
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
@@ -355,6 +492,9 @@ class _VideoScreenState extends State<VideoScreen> {
 
     return OrientationBuilder(
         builder: (context, orientation) {
+          print("======================> Orientation: ${orientation.toString()}");
+          _currentOrientation = orientation;
+          //_recoverVideo(orientation);
           return Scaffold(
             drawer: orientation == Orientation.portrait ? AppDrawer() : null,
             appBar: orientation == Orientation.portrait ? CustomAppBar(key: customBarStateKey,title: 'Videos') : null,
