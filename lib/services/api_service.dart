@@ -296,6 +296,42 @@ class APIService {
     final http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(video));
   }
 
+  void likeQuestion(int questionId) async {
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/likeQuestion'
+    );
+
+    Map<String,dynamic> payload = Map<String,dynamic>();
+    payload['id'] = questionId;
+    payload['type'] = 'like';
+
+    final http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(payload));
+  }
+
+  void noLikeQuestion(int questionId) async {
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/likeQuestion'
+    );
+
+    Map<String,dynamic> payload = Map<String,dynamic>();
+    payload['id'] = questionId;
+    payload['type'] = 'no_like';
+
+    final http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(payload));
+  }
+
   Future<http.Response> loginUser(String email, String password) async {
     var sfUri = Uri.http(
         '127.0.0.1:5000',

@@ -14,6 +14,8 @@ import 'package:youtube1/widget/appDrawer.dart';
 //import 'package:flutter_countdown_timer/current_remaining_time.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_countdown_timer/index.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audio_cache.dart';
 
 class VideoScreen extends StatefulWidget {
 
@@ -128,6 +130,9 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   _clickedOnAnswer(int questionId, int answerId){
+    final player = AudioCache(prefix: 'resources/');
+    player.play('sounds/button-click.mp3');
+
     _selectedAnswerId = answerId;
     var useremail = sharedPrefs.useremail;
     // Hide the answers not picked by the user
@@ -139,14 +144,7 @@ class _VideoScreenState extends State<VideoScreen> {
 
     _controller.play();
     _state = VideoState.QUESTION_ANSWERED;
-
-    var userScore = APIService.instance
-        .postQuestionResponse(useremail,questionId, answerId).then((userScore){
-              print('-------- Updating points');
-              sharedPrefs.userscore = userScore;
-              setState(() {});
-              //customBarStateKey.currentState.setUserPoints(userScore);
-    });
+    setState(() {});
 
   }
 
@@ -176,7 +174,16 @@ class _VideoScreenState extends State<VideoScreen> {
       print("------------------------------>Time to end: ${_currentQuestion.timeToEnd}");
       _controller.pause();
       _state = VideoState.QUESTION_SUMMARY;
-      setState(() {});
+      //setState(() {});
+
+      // Increase user score
+      var useremail = sharedPrefs.useremail;
+      var userScore = APIService.instance
+          .postQuestionResponse(useremail,_currentQuestion.id, _selectedAnswerId).then((userScore){
+        print('-------- Updating points');
+        sharedPrefs.userscore = userScore;
+        setState(() {});
+      });
     }
   }
 
@@ -185,7 +192,6 @@ class _VideoScreenState extends State<VideoScreen> {
     _answersWidget = List<Widget>();
     if(_state != VideoState.NONE && _state != VideoState.STARTED) {
       // Create the answers question if there are any left
-      print("===================>>> STATE: ${_state.toString()}");
       if ( (_state == VideoState.WAITING_ON_ANSWER) && _numQuestions > _currentQuestionIndex) {
         for (var answer in _currentQuestion.answers) {
           _answersWidget.add(
@@ -224,6 +230,10 @@ class _VideoScreenState extends State<VideoScreen> {
                               child: Text(
                                 answer['statement'],
                               ),
+                              onPressed: () {
+                                final player = AudioCache(prefix: 'resources/');
+                                player.play('sounds/button-click.mp3');
+                              },
                             )
                         )
                     )
@@ -271,109 +281,116 @@ class _VideoScreenState extends State<VideoScreen> {
 
       var summarySectionWidget = List<Widget>();
       if(_state == VideoState.QUESTION_SUMMARY) {
+        // Play summary sound
+        final player = AudioCache(prefix: 'resources/');
+        player.play('sounds/recharging-sound.mp3');
+
         bool answerIsCorrect = _currentQuestion.officialAnswerId == _selectedAnswerId;
         int endTime = DateTime
             .now()
-            .millisecondsSinceEpoch + 1000 * 5;
+            .millisecondsSinceEpoch + 1000 * 60;
         summarySectionWidget.add(
             Center(
                 child: Visibility(
                   visible: _state == VideoState.QUESTION_SUMMARY ? true : false,
-                  child: Container(
-                    margin: const EdgeInsets.all(10.0),
-                    //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
-                    decoration: BoxDecoration(
-                      //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      border: Border.all(
-                        color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                  child:
+                  Column(
+                    children: [
+                      Text(
+                        answerIsCorrect ? 'Correct!' : 'Nope',
+                        style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: answerIsCorrect ? Colors.green : _theme.colorScheme.error
+                        ),
                       ),
-                    ),
-                    child: Column(
-                        children: [
-                          Text(
-                            answerIsCorrect ? 'Correct!' : 'Nope',
-                            style: TextStyle(
-                                fontSize: 50,
-                                fontWeight: FontWeight.bold,
-                                color: answerIsCorrect ? Colors.green : _theme.colorScheme.error
-                            ),
+                      Container(
+                        margin: const EdgeInsets.all(10.0),
+                        //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                        decoration: BoxDecoration(
+                          //color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(
+                            color: answerIsCorrect ? Colors.green : _theme.colorScheme.error,
                           ),
-                          Row(
-                              children: [
-                                Expanded(
-                                  child:
-                                  IconButton(
-                                    icon: Icon(Icons.thumb_up_alt_outlined,
-                                      size: 100,
-                                      color: _theme.colorScheme
-                                          .primaryVariant,),
-                                    onPressed: () {
-                                      print("Thumbs up!!!!!!!!!!!!!!!!");
-                                    },
-                                  ),
+                        ),
+                        child: Column(
+                            children: [
+                              Text(
+                                'Did you like it?',
+                                style: TextStyle(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold,
+                                    color: _theme.colorScheme.secondary
                                 ),
-                                Expanded(
-                                  child:
-                                  IconButton(
-                                    icon: Icon(Icons.thumb_down_alt_outlined,
-                                        size: 100,
-                                        color: _theme.colorScheme
-                                            .primaryVariant),
-                                    onPressed: () {
-                                      print("Thumbs down!!!!!!!!!!!!!!!!");
-                                    },
-                                  ),
-                                ),
-                              ]
-                          ),
-                          Column(
-                              children: [
-                                Text(
-                                  'Vote! or...',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: _theme.colorScheme.secondary
-                                  ),
-                                ),
-                                //Countdown(
-                                //  countdownController: _countdownController
-                                //),
-                                CountdownTimer(
-                                  endTime: endTime,
-                                  onEnd: _prepareForNextQuestion,
-                                  widgetBuilder: (_,
-                                      CurrentRemainingTime time) {
-                                    print(
-                                        "++++++++++++++++++++++>>>>>>>>>>>>>> 'In the widget builder: ${time
-                                            .toString()}");
-                                    if (time == null) {
-                                      return Text('0');
-                                    }
-                                    return Text(
-                                      '${time.sec}',
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    GestureDetector(
+                                        onTap: () {
+                                          final player = AudioCache(prefix: 'resources/');
+                                          player.play('sounds/button-click.mp3');
+                                          APIService.instance.likeQuestion(_currentQuestion.id);
+                                          print("99999999999999999999999999999999-> Clicked on thumbs up");
+                                          _prepareForNextQuestion();
+                                        }, // handle your image tap here
+                                        child: Image(
+                                                image: AssetImage('resources/images/thumbs-up-35.png')
+                                               )
+                                    ),
+                                    GestureDetector(
+                                        onTap: () {
+                                          final player = AudioCache(prefix: 'resources/');
+                                          player.play('sounds/button-click.mp3');
+                                          APIService.instance.noLikeQuestion(_currentQuestion.id);
+                                          print("99999999999999999999999999999999-> Clicked on thumbs down");
+                                          _prepareForNextQuestion();
+                                        }, // handle your image tap here
+                                        child: Image(
+                                            image: AssetImage('resources/images/thumbs-down-35.png')
+                                        )
+                                    ),
+                                  ]
+                              ),
+                              Column(
+                                  children: [
+                                    CountdownTimer(
+                                      endTime: endTime,
+                                      onEnd: _prepareForNextQuestion,
+                                      widgetBuilder: (_,
+                                          CurrentRemainingTime time) {
+                                        print(
+                                            "++++++++++++++++++++++>>>>>>>>>>>>>> 'In the widget builder: ${time
+                                                .toString()}");
+                                        if (time == null) {
+                                          return Text('0');
+                                        }
+                                        return Text(
+                                          '${time.sec}',
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: _theme.colorScheme
+                                                  .primaryVariant
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    Text(
+                                      'For next video',
                                       style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
-                                          color: _theme.colorScheme
-                                              .primaryVariant
+                                          color: _theme.colorScheme.secondary
                                       ),
-                                    );
-                                  },
-                                ),
-                                Text(
-                                  'For next video',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: _theme.colorScheme.secondary
-                                  ),
-                                ),
-                              ]
-                          ),
-                        ]
-                    ),
+                                    ),
+                                  ]
+                              ),
+                            ]
+                        ),
+                      ),
+                  ]
                   ),
                 )
             )
