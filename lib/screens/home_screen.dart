@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:youtube1/models/playlist_model.dart';
-import 'package:youtube1/models/shared_preferences.dart';
-import 'package:youtube1/screens/playlist_screen.dart';
 import 'package:youtube1/screens/hashtag_list_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
 import 'package:youtube1/screens/video_screen.dart';
+import 'package:youtube1/screens/challenges_screen.dart';
 
 // IDEAS:
 // - Periodic Competitions:
@@ -99,6 +97,16 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => HashtagListScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Challenges"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChallengesScreen()),
               );
             },
           ),

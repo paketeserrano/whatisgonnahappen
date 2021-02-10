@@ -4,6 +4,7 @@ import 'package:youtube1/screens/home_screen.dart';
 import 'package:youtube1/screens/hashtag_list_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/screens/video_screen.dart';
+import 'package:youtube1/screens/challenges_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -18,7 +19,7 @@ class AppDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: Text(sharedPrefs.username),
             accountEmail: Text('${sharedPrefs.useremail} | Score: ${sharedPrefs.userscore}'),
-            currentAccountPicture: new Image.network('https://www.woolha.com/media/2020/03/eevee.png'),
+            currentAccountPicture: new Image.asset('resources/images/tv-64.png'),
             decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryVariant),
           ),
           ListTile(
@@ -71,6 +72,16 @@ class AppDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined),
+            title: Text("Challenges"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChallengesScreen()),
               );
             },
           ),

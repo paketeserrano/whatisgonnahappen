@@ -72,7 +72,7 @@ class CustomAppBarState extends State<CustomAppBar>{
         ),
         PopupMenuButton<String>(
           icon: CircleAvatar(
-              backgroundImage: NetworkImage('https://www.woolha.com/media/2020/03/eevee.png')
+              backgroundImage: AssetImage('resources/images/tv-64.jpg')
           ),
           onSelected: (result) async {
             if(result == sharedPrefs.username)

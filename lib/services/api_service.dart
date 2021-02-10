@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:youtube1/models/channel_model.dart';
+import 'package:youtube1/models/most_points_challenge.dart';
 import 'package:youtube1/models/shared_preferences.dart';
 import 'package:youtube1/models/video_model.dart';
 import 'package:youtube1/utilities/keys.dart';
@@ -15,7 +16,7 @@ class APIService {
   static final APIService instance = APIService._instantiate();
 
   final String _baseYoutubeUrl = 'www.googleapis.com';
-  final String _serverUrl = '192.168.1.233:5000'; //'127.0.0.1:5000';
+  final String _serverUrl = '127.0.0.1:5000'; //'192.168.1.233:5000'; Use the commented address when testing at home with real phone- Use home ip address
   String _nextPageToken = '';
   String _nextPlaylistPageToken = '';
 
@@ -391,5 +392,93 @@ class APIService {
     http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(parameters));
 
     return response;
+  }
+
+  Future<http.Response> createMostPointsChallenge(String challengedUserName, int hours) async {
+    var sfUri = Uri.http(
+        '127.0.0.1:5000',
+        '/createMostPointsChallenge'
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    var parameters = {
+      'challenger_username': sharedPrefs.username,
+      'challenged_username': challengedUserName,
+      'challenge_duration_in_hours': hours,
+    };
+
+    Future<http.Response> response = http.post(sfUri,headers: headers,body: jsonEncode(parameters));
+    return response;
+
+  }
+
+  Future<http.Response> saveMostPointChallenges(MostPointChallenge challenge) async {
+    var sfUri = Uri.http(
+        '127.0.0.1:5000',
+        '/saveMostPointsChallenge'
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    Future<http.Response> response = http.post(sfUri,headers: headers,body: jsonEncode(challenge.toJson()));
+    return response;
+  }
+
+  Future< List<MostPointChallenge> > getUserActiveMostPointChallenges() async {
+    Map<String, String> parameters = {
+      'usr': sharedPrefs.username,
+    };
+
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/getUserActiveMostPointChallenges',
+        parameters
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    var response = await http.get(sfUri, headers: headers);
+
+    if (response.statusCode == 200) {
+      List challengesJson = json.decode(response.body)['challenges'];
+      List<MostPointChallenge> challenges = new List<MostPointChallenge>();
+      challengesJson.forEach((challengeJson) {
+        print(challengeJson);
+        MostPointChallenge challenge = MostPointChallenge.fromMap(challengeJson);
+        challenges.add(challenge);
+      });
+
+      return challenges;
+    } else {
+      print('-----------------> Exception thrown');
+      throw json.decode(response.body)['error']['message'];
+    }
+
+  }
+
+  Future<http.Response> acceptMostPointsChallenge(MostPointChallenge challenge) async {
+    var sfUri = Uri.http(
+        '127.0.0.1:5000',
+        '/acceptMostPointsChallenge'
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    Future<http.Response> response = http.post(sfUri,headers: headers,body: jsonEncode(challenge.toJson()));
+    return response;
+
   }
 }
