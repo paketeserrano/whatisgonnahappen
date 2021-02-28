@@ -4,6 +4,7 @@ import 'package:youtube1/models/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube1/screens/login.page.dart';
 import 'package:youtube1/screens/add_videos_screen.dart';
+import 'package:youtube1/screens/add_videos_initial_screen.dart';
 import 'package:countup/countup.dart';
 
 class CustomAppBar extends StatefulWidget  implements PreferredSizeWidget {
@@ -33,7 +34,11 @@ List<PopupMenuEntry<String>> getPopupMenuItems(){
   ];
   if(sharedPrefs.userrole == 'admin'){
     popupItems.add(PopupMenuItem(
-      value: 'Add Videos',
+      value: 'Add Video',
+      child:Text('Add Video'),
+    ));
+    popupItems.add(PopupMenuItem(
+      value: '${sharedPrefs.userrole}',
       child:Text(sharedPrefs.userrole),
     ));
   }
@@ -45,6 +50,7 @@ class CustomAppBarState extends State<CustomAppBar>{
   int userScore;
   @override
   void initState() {
+    super.initState();
     userScore = sharedPrefs.userscore;
     oldUserScore = sharedPrefs.userscore;
   }
@@ -88,11 +94,11 @@ class CustomAppBarState extends State<CustomAppBar>{
                 ),
               );
             }
-            else if(result == 'Add Videos'){
+            else if(result == 'Add Video'){
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AddVideosScreen(),
+                  builder: (_) => AddVideosInitialScreen(),
                 ),
               );
             }

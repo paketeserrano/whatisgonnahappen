@@ -9,6 +9,7 @@ class Video {
   bool published;
   String thumbnailUrl;
   List<Question> questions;
+  String channelId;
 
   Video({
     this.id,
@@ -17,9 +18,14 @@ class Video {
     this.questions,
     this.youtubeId,
     this.thumbnailUrl,
+    this.channelId,
   });
 
   factory Video.fromMap(Map<String, dynamic> map) {
+    print("*****************************");
+    print(map);
+    print("*****************************");
+
     return Video(
       id: map['id'],
       name: map['name'],
@@ -27,6 +33,7 @@ class Video {
       questions: createQuestions(map['questions']),
       youtubeId: map['youtube_id'],
       thumbnailUrl: null,
+      channelId: map['channel_id']
     );
   }
 
@@ -37,6 +44,7 @@ class Video {
       'youtubeId': this.youtubeId,
       'published': this.published.toString(),
       'thumbnail': this.thumbnailUrl,
+      'channel_id': this.channelId,
     };
   }
 

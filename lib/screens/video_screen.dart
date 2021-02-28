@@ -16,6 +16,7 @@ import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_countdown_timer/index.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VideoScreen extends StatefulWidget {
 
@@ -52,6 +53,8 @@ class _VideoScreenState extends State<VideoScreen> {
   final GlobalKey<CustomAppBarState> customBarStateKey = GlobalKey<CustomAppBarState>();
   ThemeData _theme;
   Orientation _currentOrientation;
+  CountdownTimerController _countdownController;
+  bool isReplayingVideo;
 
   _initPage(Video video){
     _video = video;
@@ -64,7 +67,7 @@ class _VideoScreenState extends State<VideoScreen> {
     _answersWidget = List<Widget>();
     _answersWidgetOpacity = Map<int,bool>();
     _questionAnswers = List<Widget>();
-
+    isReplayingVideo = false;
 
     _currentQuestion = _video.questions[_currentQuestionIndex];
     _numQuestions = _video.questions.length;
@@ -103,6 +106,15 @@ class _VideoScreenState extends State<VideoScreen> {
     _loadVideo();
   }
 
+  @override
+  void dispose() {
+    print("-------------CALLING DISPOSE!!!!");
+    if(_countdownController != null)
+      _countdownController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
   _prepareForNextQuestion(){
     _currentQuestionIndex++;
     _selectedAnswerId = -1;
@@ -119,7 +131,7 @@ class _VideoScreenState extends State<VideoScreen> {
     }
     else{
       APIService.instance.fetchRandomVideo().then((video){
-        print("---------------------------> Trying to change to a new videooooooooooooooooooooooooooooo");
+        // Change to a new video
         _timer.cancel();
         _initPage(video);
         setState(() {});
@@ -185,6 +197,14 @@ class _VideoScreenState extends State<VideoScreen> {
         setState(() {});
       });
     }
+  }
+
+  // addedTime in seconds to the video question time
+  void initializeController(int addedTime){
+    int endTime = DateTime
+        .now()
+        .millisecondsSinceEpoch + 1000 * (_currentQuestion.timeToEnd - _currentQuestion.timeToStart + addedTime);
+    _countdownController = CountdownTimerController(endTime: endTime, onEnd: _prepareForNextQuestion);
   }
 
   _createAnswerQuestionsWidget(){
@@ -286,9 +306,11 @@ class _VideoScreenState extends State<VideoScreen> {
         player.play('sounds/recharging-sound.mp3');
 
         bool answerIsCorrect = _currentQuestion.officialAnswerId == _selectedAnswerId;
-        int endTime = DateTime
-            .now()
-            .millisecondsSinceEpoch + 1000 * 60;
+        if(!isReplayingVideo)
+          initializeController(0);
+        else
+          isReplayingVideo = false;
+
         summarySectionWidget.add(
             Center(
                 child: Visibility(
@@ -356,8 +378,7 @@ class _VideoScreenState extends State<VideoScreen> {
                               Column(
                                   children: [
                                     CountdownTimer(
-                                      endTime: endTime,
-                                      onEnd: _prepareForNextQuestion,
+                                      controller: _countdownController,
                                       widgetBuilder: (_,
                                           CurrentRemainingTime time) {
                                         print(
@@ -457,7 +478,63 @@ class _VideoScreenState extends State<VideoScreen> {
                 child: _youtubePlayerWidget
         ),
         Column(
-          children: _questionAnswers,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  child:
+                    Container(
+                      padding: EdgeInsets.only(top: 10, left: 10),
+                      child:
+                        Text(
+                          _video.channelId != null ? 'Video channel' : '',
+                          style: TextStyle(
+                            color: _theme.colorScheme.secondary,
+                            fontSize: 10.0,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    onTap: () async {
+                      String channelUrl = 'https://www.youtube.com/channel/' + _video.channelId;
+                      print("---------------------> On link click");
+                      if (await canLaunch(channelUrl)) {
+                        await launch(channelUrl);
+                      }
+                    }
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 10, right: 10),
+                  child:
+                    FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: _theme.colorScheme.secondary, width: 3),
+                      ),
+                      onPressed: () {
+                        print("ON CLICK");
+                        _controller.cue(_video.youtubeId,startAt: _currentQuestion.timeToStart, endAt: _currentQuestion.timeToEnd);
+                        _controller.play();
+                        setState(() {
+                          isReplayingVideo = true;
+                          initializeController(5);
+                        });
+                      },
+                      child: Text(
+                        'Replay',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                    ),
+                ),
+              ],
+            ),
+            ..._questionAnswers
+          ],
         )
       ],
     );

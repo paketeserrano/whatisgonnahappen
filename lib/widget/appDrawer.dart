@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube1/models/shared_preferences.dart';
 import 'package:youtube1/screens/home_screen.dart';
+import 'package:youtube1/screens/home_screen_2.dart';
 import 'package:youtube1/screens/hashtag_list_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/screens/video_screen.dart';
@@ -26,10 +27,10 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.home),
             title: Text("Home"),
             onTap: () {
-              print("Home Clicked");
-              Navigator.push(
+              print("Home 2 Clicked");
+              Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
+                MaterialPageRoute(builder: (context) => HomeScreen2()),
               );
             },
           ),
@@ -39,9 +40,10 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               print("Play Random Vids Clicked");
               APIService.instance.fetchRandomVideo().then((video){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => VideoScreen(video)),
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => VideoScreen(video))
+                //Navigator.push(
+                //  context,
+                //  MaterialPageRoute(builder: (context) => VideoScreen(video)),
                 );
               });
             },
@@ -51,7 +53,7 @@ class AppDrawer extends StatelessWidget {
             title: Text("Play a Hashtag List"),
             onTap: () {
               print("Play a Hashtag List Clicked");
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HashtagListScreen()),
               );
@@ -69,7 +71,7 @@ class AppDrawer extends StatelessWidget {
             title: Text("Play as developer"),
             onTap: () {
               print("Play aa developer game Clicked");
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HomeScreen()),
               );
@@ -79,7 +81,7 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.group_outlined),
             title: Text("Challenges"),
             onTap: () {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => ChallengesScreen()),
               );

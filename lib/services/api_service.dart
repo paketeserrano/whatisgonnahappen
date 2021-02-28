@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:youtube1/models/channel_model.dart';
 import 'package:youtube1/models/most_points_challenge.dart';
 import 'package:youtube1/models/shared_preferences.dart';
+import 'package:youtube1/models/user.dart';
 import 'package:youtube1/models/video_model.dart';
 import 'package:youtube1/utilities/keys.dart';
 import 'package:youtube1/models/playlist_model.dart';
@@ -283,7 +284,7 @@ class APIService {
     return userScore;
   }
 
-  void addVideo(Map<String,dynamic> video) async {
+  Future<http.Response> addVideo(Map<String,dynamic> video) async {
     Map<String, String> headers = {
       'cookie': sharedPrefs.usersessiontoken,
       HttpHeaders.contentTypeHeader: 'application/json',
@@ -295,6 +296,7 @@ class APIService {
     );
 
     final http.Response response = await http.post(sfUri,headers: headers,body: jsonEncode(video));
+    return response;
   }
 
   void likeQuestion(int questionId) async {
@@ -416,10 +418,10 @@ class APIService {
 
   }
 
-  Future<http.Response> saveMostPointChallenges(MostPointChallenge challenge) async {
+  Future<http.Response> setMostPointsChallengeState(MostPointChallenge challenge) async {
     var sfUri = Uri.http(
         '127.0.0.1:5000',
-        '/saveMostPointsChallenge'
+        '/setMostPointsChallengeState'
     );
 
     Map<String, String> headers = {
@@ -453,7 +455,6 @@ class APIService {
       List challengesJson = json.decode(response.body)['challenges'];
       List<MostPointChallenge> challenges = new List<MostPointChallenge>();
       challengesJson.forEach((challengeJson) {
-        print(challengeJson);
         MostPointChallenge challenge = MostPointChallenge.fromMap(challengeJson);
         challenges.add(challenge);
       });
@@ -463,7 +464,39 @@ class APIService {
       print('-----------------> Exception thrown');
       throw json.decode(response.body)['error']['message'];
     }
+  }
 
+  Future< List<MostPointChallenge> > getUserCompletedMostPointChallenges() async {
+    Map<String, String> parameters = {
+      'usr': sharedPrefs.username,
+    };
+
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/getUserCompletedMostPointChallenges',
+        parameters
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    var response = await http.get(sfUri, headers: headers);
+
+    if (response.statusCode == 200) {
+      List challengesJson = json.decode(response.body)['challenges'];
+      List<MostPointChallenge> challenges = new List<MostPointChallenge>();
+      challengesJson.forEach((challengeJson) {
+        MostPointChallenge challenge = MostPointChallenge.fromMap(challengeJson);
+        challenges.add(challenge);
+      });
+
+      return challenges;
+    } else {
+      print('-----------------> Exception thrown');
+      throw json.decode(response.body)['error']['message'];
+    }
   }
 
   Future<http.Response> acceptMostPointsChallenge(MostPointChallenge challenge) async {
@@ -481,4 +514,39 @@ class APIService {
     return response;
 
   }
+
+  Future< List<String>> usernameSuggestions(String pattern) async {
+    Map<String, String> parameters = {
+      'pattern': pattern,
+    };
+
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/getUsernameSuggestions',
+        parameters
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    var response = await http.get(sfUri, headers: headers);
+
+    if (response.statusCode == 200) {
+      List usernamesJson = json.decode(response.body)['usernames'];
+      List<String> usernames = new List<String>();
+      usernamesJson.forEach((usernameJson) {
+        User user = User.fromMap(usernameJson);
+        usernames.add(user.username);
+      });
+      print('--------> usernames: $usernames');
+      return usernames;
+    } else {
+      print('-----------------> Exception thrown');
+      throw json.decode(response.body)['error']['message'];
+    }
+  }
+
+
 }
