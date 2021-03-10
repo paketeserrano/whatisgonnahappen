@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/models/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:youtube1/screens/login.page.dart';
+import 'package:youtube1/screens/login_screen.dart';
+import 'package:youtube1/screens/user_screen.dart';
 import 'package:youtube1/screens/add_videos_screen.dart';
 import 'package:youtube1/screens/add_videos_initial_screen.dart';
 import 'package:countup/countup.dart';
@@ -21,15 +22,14 @@ class CustomAppBar extends StatefulWidget  implements PreferredSizeWidget {
 
 }
 
-List<PopupMenuEntry<String>> getPopupMenuItems(){
-  List<PopupMenuEntry<String>> popupItems = [
+List<PopupMenuEntry<Object>> getPopupMenuItems(){
+  List<PopupMenuEntry<Object>> popupItems = [
     PopupMenuItem(
-      value: sharedPrefs.username,
-      child: Text(sharedPrefs.username),
+      value: 'Profile',
+      child: Text('Profile'),
     ),
-    PopupMenuItem(
-      value: 'Log out',
-      child: Text("Log Out"),
+    PopupMenuDivider(
+      height: 20,
     ),
   ];
   if(sharedPrefs.userrole == 'admin'){
@@ -37,11 +37,15 @@ List<PopupMenuEntry<String>> getPopupMenuItems(){
       value: 'Add Video',
       child:Text('Add Video'),
     ));
-    popupItems.add(PopupMenuItem(
-      value: '${sharedPrefs.userrole}',
-      child:Text(sharedPrefs.userrole),
+    popupItems.add(PopupMenuDivider(
+      height: 20,
     ));
   }
+  popupItems.add(PopupMenuItem(
+      value: 'Log out',
+      child: Text("Log Out"),
+    )
+  );
   return popupItems;
 }
 
@@ -76,18 +80,25 @@ class CustomAppBarState extends State<CustomAppBar>{
             fontSize: 36,
           ),
         ),
-        PopupMenuButton<String>(
+        PopupMenuButton<Object>(
           icon: CircleAvatar(
-              backgroundImage: AssetImage('resources/images/tv-64.jpg')
+              backgroundImage: AssetImage('resources/images/tv.png')
           ),
           onSelected: (result) async {
-            if(result == sharedPrefs.username)
+            if(result == 'Profile') {
               print(sharedPrefs.username);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserScreen(),
+                ),
+              );
+            }
             else if(result == 'Log out'){
               print('Log out');
               http.Response response = await APIService.instance.logoutUser();
               sharedPrefs.isloggedin = false;
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => LoginPage(),
@@ -95,7 +106,7 @@ class CustomAppBarState extends State<CustomAppBar>{
               );
             }
             else if(result == 'Add Video'){
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => AddVideosInitialScreen(),

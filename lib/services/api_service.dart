@@ -147,6 +147,32 @@ class APIService {
     return video;
   }
 
+  Future<Map<String, int>> getUserStats() async {
+    Uri sfUri = Uri.http(
+        _serverUrl,
+        '/getUserStats'
+    );
+
+    Map<String, String> headers = {
+      'cookie': sharedPrefs.usersessiontoken,
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    Map<String, int> stats = Map<String,int>();
+    var response = await http.get(sfUri, headers: headers);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> statsResponse = json.decode(response.body)['stats'];
+      stats['num_questions_answered'] = statsResponse['num_questions_answered'];
+      stats['num_right_responses'] = statsResponse['num_right_responses'];
+      stats['num_challenges_won'] = statsResponse['num_challenges_won'];
+    }
+    else{
+      stats['num_questions_answered'] = 0;
+      stats['num_right_responses'] = 0;
+    }
+    return stats;
+  }
+
   Future<List<Video>> fetchPlaylistVideos({Playlist playlist}) async {
     List<Video> videos = [];
 

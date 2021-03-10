@@ -112,6 +112,7 @@ class _VideoScreenState extends State<VideoScreen> {
     if(_countdownController != null)
       _countdownController.dispose();
     _controller.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -165,7 +166,7 @@ class _VideoScreenState extends State<VideoScreen> {
       return;
     }
 
-    print(_controller.value.position.inSeconds);
+    print('Position in seconds:  ${_controller.value.position.inSeconds} ');
     var currentSecond = _controller.value.position.inSeconds;
 
     if(_state == VideoState.STARTED && currentSecond == _currentQuestion.timeToShow){
