@@ -117,6 +117,7 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   _prepareForNextQuestion(){
+    _countdownController.disposeTimer();
     _currentQuestionIndex++;
     _selectedAnswerId = -1;
     print("---------------:: _numQuestions: $_numQuestions _currentQuestionIndex: $_currentQuestionIndex");
@@ -127,8 +128,12 @@ class _VideoScreenState extends State<VideoScreen> {
       for (var answer in _currentQuestion.answers) {
         _answersWidgetOpacity[answer['id']] = true;
       }
-      setState(() {});
-      _controller.seekTo(nextQuestionStart);
+      setState(() {
+        print("++++++++++++++++++++++++++++++++++++++++ CALLING SEEKTO");
+        _controller.seekTo(nextQuestionStart);
+      });
+      //print("++++++++++++++++++++++++++++++++++++++++ CALLING SEEKTO");
+      //_controller.seekTo(nextQuestionStart);
     }
     else{
       APIService.instance.fetchRandomVideo().then((video){
@@ -155,6 +160,7 @@ class _VideoScreenState extends State<VideoScreen> {
       }
     });
 
+    print('Clicking play because on _clickedOnAnswer');
     _controller.play();
     _state = VideoState.QUESTION_ANSWERED;
     setState(() {});
@@ -180,6 +186,7 @@ class _VideoScreenState extends State<VideoScreen> {
       print("------------------------------>Time to stop: ${_currentQuestion.timeToStop}");
       _state = VideoState.WAITING_ON_ANSWER;
       _controller.pause();
+      print(_controller.value.playerState);
       setState(() {});
     }
 
@@ -187,7 +194,6 @@ class _VideoScreenState extends State<VideoScreen> {
       print("------------------------------>Time to end: ${_currentQuestion.timeToEnd}");
       _controller.pause();
       _state = VideoState.QUESTION_SUMMARY;
-      //setState(() {});
 
       // Increase user score
       var useremail = sharedPrefs.useremail;
@@ -202,6 +208,7 @@ class _VideoScreenState extends State<VideoScreen> {
 
   // addedTime in seconds to the video question time
   void initializeController(int addedTime){
+    print('===================> INITIALIZING CONTROLLER!!!!');
     int endTime = DateTime
         .now()
         .millisecondsSinceEpoch + 1000 * (_currentQuestion.timeToEnd - _currentQuestion.timeToStart + addedTime);
@@ -507,30 +514,33 @@ class _VideoScreenState extends State<VideoScreen> {
                       }
                     }
                 ),
-                Container(
-                  padding: EdgeInsets.only(top: 10, right: 10),
+                Visibility(
+                  visible: !isReplayingVideo && _state == VideoState.QUESTION_SUMMARY,
                   child:
-                    FlatButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: _theme.colorScheme.secondary, width: 3),
-                      ),
-                      onPressed: () {
-                        print("ON CLICK");
-                        _controller.cue(_video.youtubeId,startAt: _currentQuestion.timeToStart, endAt: _currentQuestion.timeToEnd);
-                        _controller.play();
-                        setState(() {
-                          isReplayingVideo = true;
-                          initializeController(5);
-                        });
-                      },
-                      child: Text(
-                        'Replay',
-                        style: TextStyle(
-                          fontSize: 15.0,
+                    Container(
+                      padding: EdgeInsets.only(top: 10, right: 10),
+                      child:
+                        FlatButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: _theme.colorScheme.secondary, width: 3),
+                          ),
+                          onPressed: () {
+                            _controller.cue(_video.youtubeId,startAt: _currentQuestion.timeToStart, endAt: _currentQuestion.timeToEnd);
+                            _controller.play();
+                            setState(() {
+                              isReplayingVideo = true;
+                              initializeController(5);
+                            });
+                          },
+                          child: Text(
+                            'Replay',
+                            style: TextStyle(
+                              fontSize: 15.0,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                    )
                 ),
               ],
             ),

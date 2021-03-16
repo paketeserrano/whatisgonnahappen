@@ -20,10 +20,9 @@ class AppDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: Text(sharedPrefs.username),
             accountEmail: Text('${sharedPrefs.useremail} | Score: ${sharedPrefs.userscore}'),
-            //currentAccountPicture: new Image.asset('resources/images/tv-64.png'),
             decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryVariant,
-                image: new DecorationImage(image: new ExactAssetImage('resources/images/tv.png'), scale: 4),
+                image: new DecorationImage(image: new ExactAssetImage('resources/images/vid-quest-logo.png'), scale: 4),
             ),
           ),
           ListTile(

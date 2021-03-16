@@ -63,15 +63,15 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(top: 60.0),
+                  padding: const EdgeInsets.only(top: 20.0),
                   child: Center(
                     child: Container(
-                        width: 200,
-                        height: 150,
+                        width: 300,
+                        height: 300,
                         /*decoration: BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(50.0)),*/
-                        child: Image.asset('resources/images/flutter-logo.png')),
+                        child: Image.asset('resources/images/vid-quest-logo.png')),
                   ),
                 ),
                 Padding(
@@ -149,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 SizedBox(
-                  height: 130,
+                  height: 20,
                 ),
                 FlatButton(
                   onPressed: (){

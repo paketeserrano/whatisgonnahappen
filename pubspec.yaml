@@ -37,6 +37,7 @@ dependencies:
   flutter_typeahead: ^2.0.0
   youtube_parser: ^1.1.0
   url_launcher: ^5.7.10
+  flutter_native_splash: ^0.3.2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -63,6 +64,10 @@ flutter:
     - resources/
     - resources/images/
     - resources/sounds/
+
+flutter_native_splash:
+  color: "#35A0CB"
+  image: resources/images/vid-quest-logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

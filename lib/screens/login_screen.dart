@@ -81,15 +81,15 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(top: 60.0),
+                padding: const EdgeInsets.only(top: 20.0),
                 child: Center(
                   child: Container(
-                      width: 200,
-                      height: 150,
+                      width: 300,
+                      height: 300,
                       /*decoration: BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(50.0)),*/
-                      child: Image.asset('resources/images/flutter-logo.png')),
+                      child: Image.asset('resources/images/vid-quest-logo.png')),
                 ),
               ),
               Padding(
@@ -130,13 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
-              FlatButton(
-                onPressed: (){
-                },
-                child: Text(
-                  'Forgot Password',
-                  style: TextStyle(color: Colors.blue, fontSize: 15),
-                ),
+              SizedBox(
+                height: 20,
               ),
               Container(
                 height: 50,
@@ -156,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(
-                height: 130,
+                height: 20,
               ),
               FlatButton(
                 onPressed: (){
