@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    super.initState();
     _formKey = GlobalKey<FormState>();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
@@ -39,6 +40,10 @@ class _LoginPageState extends State<LoginPage> {
     var password = _passwordController.text;
 
     http.Response response = await APIService.instance.loginUser(email, password);
+    print("--------------");
+    print(response.headers);
+    print(response.body);
+    print("--------------");
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.

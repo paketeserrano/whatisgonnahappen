@@ -34,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void doRegister() async{
+  Future<bool> doRegister() async{
     var email = _emailController.text;
     var password = _passwordController.text;
     var username = _usernameController.text;
@@ -42,9 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
     http.Response response = await APIService.instance.registerUser(username, email, password);
 
     if (response.statusCode == 200) {
-      // TODO: Show a snackbar
-      var user = jsonDecode(response.body);
-      print(user);
+      return true;
     } else {
       throw Exception('Exception contacting the server');
     }
@@ -139,7 +137,18 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: FlatButton(
                     onPressed: () {
                       if(_formKey.currentState.validate()) {
-                        doRegister();
+                        doRegister().then((isSuccessfull){
+                          if(isSuccessfull){
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Success! Go to the log in page and start playing'),
+                            ));
+                          }
+                          else{
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Something went wrong. It can be a connectivity issue.'),
+                            ));
+                          }
+                        });
                       }
                     },
                     child: Text(
