@@ -17,7 +17,7 @@ class APIService {
   static final APIService instance = APIService._instantiate();
 
   final String _baseYoutubeUrl = 'www.googleapis.com';
-  final String _serverUrl = '127.0.0.1:5000'; //'192.168.1.233:5000'; Use the commented address when testing at home with real phone- Use home ip address
+  final String _serverUrl = '192.168.1.233:5000';//'127.0.0.1:5000'; //'192.168.1.233:5000'; Use the commented address when testing at home with real phone- Use home ip address
   String _nextPageToken = '';
   String _nextPlaylistPageToken = '';
 

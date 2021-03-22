@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:youtube1/models/shared_preferences.dart';
-import 'package:youtube1/screens/hashtag_list_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
-import 'package:youtube1/screens/video_screen.dart';
-import 'package:youtube1/screens/challenges_screen.dart';
-import 'package:youtube1/screens/login_screen.dart';
-import 'package:youtube1/screens/user_screen.dart';
 
 class UserScreen extends StatefulWidget {
   @override

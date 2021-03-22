@@ -134,14 +134,12 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("--------------------------------------> Building Playlist Screen");
     _theme = Theme.of(context);
     return Scaffold(
       appBar: CustomAppBar(key: customBarStateKey, title: 'Hashtags'),
       body: ListView.builder(
           itemCount: 1 + _videos.length,
           itemBuilder: (BuildContext context, int index) {
-            print('index: $index');
             if (index == 0) {
               return _buildProfileInfo();
             }

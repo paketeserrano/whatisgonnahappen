@@ -32,23 +32,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void doLogin() async{
-    print("--------------Do Login function");
-    print(_emailController.text);
-    print(_passwordController.text);
-
     var email = _emailController.text;
     var password = _passwordController.text;
 
     http.Response response = await APIService.instance.loginUser(email, password);
-    print("--------------");
-    print(response.headers);
-    print(response.body);
-    print("--------------");
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
       var user = jsonDecode(response.body);
-      print(user);
       sharedPrefs.username = user['username'];
       sharedPrefs.useremail = user['email'];
       sharedPrefs.userscore = user['score'];

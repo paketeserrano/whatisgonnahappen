@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
-import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/screens/add_videos_screen.dart';
 import 'package:youtube_parser/youtube_parser.dart';
+import 'package:youtube1/widget/appDrawer.dart';
 
 class AddVideosInitialScreen extends StatefulWidget{
   @override
@@ -30,6 +30,7 @@ class _AddVideosInitialStateScreen extends State<AddVideosInitialScreen>{
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     return Scaffold(
+      drawer: AppDrawer(),
       appBar: CustomAppBar(title: 'Add a new Video'),
       body: Form(
               key: _formKey,

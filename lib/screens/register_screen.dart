@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:youtube1/services/api_service.dart';
-import 'package:youtube1/screens/home_screen.dart';
-import 'package:youtube1/models/shared_preferences.dart';
 import 'package:youtube1/screens/login_screen.dart';
 
 class RegisterPage extends StatefulWidget {

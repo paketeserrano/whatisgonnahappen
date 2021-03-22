@@ -98,7 +98,6 @@ class _AddVideosScreenState extends State<AddVideosScreen>{
     answersList.add(_questionStateKey.currentState.answer1.text);
     answersList.add(_questionStateKey.currentState.answer2.text);
     if(_questionStateKey.currentState.answer3.text != ''){
-      print("---- Adding answer 3");
       answersList.add(_questionStateKey.currentState.answer3.text);
     }
     questionMap['answers'] = answersList;
@@ -137,7 +136,6 @@ class _AddVideosScreenState extends State<AddVideosScreen>{
                             questionAnswersValuesForEditing = _questionList[index];
                             questionAnswerIndexForEditing = index;
                             _showAddQuestionWidget();
-                            print('Editing');
                           },
                         ),
                       ),
@@ -147,7 +145,6 @@ class _AddVideosScreenState extends State<AddVideosScreen>{
                         IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () {
-                            print('Deleting');
                             setState(() {_questionList.removeAt(index);});
                           },
                         ),
@@ -249,7 +246,6 @@ class _AddVideosScreenState extends State<AddVideosScreen>{
                                   video['name'] = _videoNameController.text;
                                   video['youtube_id'] = _youtubeVideoId;
                                   video['questions'] = _questionList;
-                                  print(video);
                                   APIService.instance.addVideo(video).then((response) {
                                     if (response.statusCode == 200) {
                                       Map<String, dynamic> responseBody = json.decode(response.body);

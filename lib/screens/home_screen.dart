@@ -5,7 +5,6 @@ import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
 import 'package:youtube1/screens/video_screen.dart';
 import 'package:youtube1/screens/challenges_screen.dart';
-import 'package:youtube1/screens/login_screen.dart';
 import 'package:youtube1/screens/user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -183,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: _theme.colorScheme.primary,//Colors.grey,
                   child: InkWell(
                     onTap: () {
-                      print("Home Clicked");
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -211,7 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: _theme.colorScheme.primary,//Colors.grey,
                   child: InkWell(
                     onTap: () {
-                      print("Home Clicked");
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => UserScreen()),

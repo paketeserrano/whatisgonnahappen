@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube1/models/playlist_model.dart';
 import 'package:youtube1/models/shared_preferences.dart';
-import 'package:youtube1/screens/playlist_screen.dart';
 import 'package:youtube1/services/api_service.dart';
 import 'package:youtube1/widget/appDrawer.dart';
 import 'package:youtube1/widget/custom_app_bar.dart';
@@ -89,8 +88,6 @@ class _HashtagListScreenState extends State<HashtagListScreen> {
       body: ListView.builder(
         itemCount: _playlists.length,
         itemBuilder: (BuildContext context, int index) {
-          print('index channel screen: $index');
-          print('playlist length: ${_playlists.length}');
           Playlist playlist = _playlists[index];
           return _buildPlaylist(playlist);
         },
